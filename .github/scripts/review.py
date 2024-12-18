@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import List, Dict, Any
 import requests
 from github import Github
-from llama_cpp import Llama
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
