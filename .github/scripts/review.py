@@ -24,7 +24,7 @@ class CodeReviewer:
         self.gh_client = Github(self.github_token)
         self.repo = self.gh_client.get_repo(self.repo_name)
         self.pr = self.repo.get_pull(self.pr_number)
-        self.gemini_token = os.getenv('OPENAI_API_KEY')
+        self.gemini_token = os.getenv('GEMINI_TOKEN')
         # Model path
         # self.model_path = str(Path.home() / '.cache/models/codellama-7b.Q4_K_M.gguf')
         # Validate model exists
@@ -56,7 +56,7 @@ class CodeReviewer:
         except Exception as e:
             print(f"Error reading file {file_path}: {e}")
             return ""
-    def analyze_code(self, code: str, file_path: str) -> str:
+    def analyze_code(self, code: str, file_path: str, gemini_token: str) -> str:
         """
         Analyze code using the LLM.
         Args:
@@ -101,7 +101,7 @@ class CodeReviewer:
         #     print(f"Error analyzing code: {e}")
         #     return f"Unable to generate review due to error: {e}"
         model = ChatOpenAI(model="gpt-4o-mini",
-                   api_key=self.gemini_token,
+                   api_key=gemini_token,
                    base_url="https://data.talabat.com/api/public/genai"
                    )
 
@@ -151,7 +151,7 @@ class CodeReviewer:
             content = self.get_file_content(file.filename)
             if not content:
                 continue
-            review = self.analyze_code(content, file.filename)
+            review = self.analyze_code(content, file.filename, self.gemini_token)
             reviews.append({
                 'file_path': file.filename,
                 'review': review

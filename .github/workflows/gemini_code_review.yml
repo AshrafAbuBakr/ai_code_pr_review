@@ -71,6 +71,7 @@ jobs:
         timeout-minutes: 10  # Add timeout
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_TOKEN: ${{ secrets.GEMINI_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO_NAME: ${{ github.repository }}
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
