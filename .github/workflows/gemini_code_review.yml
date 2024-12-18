@@ -64,7 +64,7 @@ jobs:
 
     steps:
 #       Previous steps remain the same...
-
+      - uses: actions/checkout@v3
       - name: Run code review with timeout
         timeout-minutes: 10  # Add timeout
         env:
