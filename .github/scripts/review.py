@@ -24,7 +24,7 @@ class CodeReviewer:
         self.gh_client = Github(self.github_token)
         self.repo = self.gh_client.get_repo(self.repo_name)
         self.pr = self.repo.get_pull(self.pr_number)
-        self.gemini_token = os.getenv('GEMINI_TOKEN')
+        self.gemini_token = os.getenv('OPENAI_API_KEY')
         # Model path
         # self.model_path = str(Path.home() / '.cache/models/codellama-7b.Q4_K_M.gguf')
         # Validate model exists
