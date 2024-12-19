@@ -62,55 +62,51 @@ class CodeReviewer:
         Args:
             code (str): Code content to analyze
             file_path (str): Path of the file being analyzed
+            gemini_token (str): API token for the model
         Returns:
             str: AI-generated code review
         """
-        # model = self._load_model()
-        #Provide a detailed code review for the following {Path(file_path).suffix} file:
-        #File: {file_path}
-        prompt = ChatPromptTemplate.from_template(f"""
-           Provide a detailed code review for this Flutter code.
-           Focus on:
-               1. Code quality and best practices specific to Flutter and Dart
-               2. Potential performance bottlenecks or widget rendering issues
-               3. Security considerations in mobile app development
-               4. Recommended architectural or implementation improvements
-           Please include specific, actionable feedback with code suggestions where applicable.
-           Code:
-           ```
-           {code}
-           ```
-           Focus on:
-           1. Code quality and best practices
-           2. Potential bugs or performance issues
-           3. Security considerations
-           4. Recommended improvements
-           Provide concise, actionable feedback.
-           """)
-        print(prompt)
-        # try:
-        #     response = model.create_completion(
-        #         prompt,
-        #         max_tokens=1024,
-        #         temperature=0.3,
-        #         stop=["```"]
-        #     )
-        #     print(response)
-        #     return response['choices'][0]['text'].strip()
-        # except Exception as e:
-        #     print(f"Error analyzing code: {e}")
-        #     return f"Unable to generate review due to error: {e}"
-        model = ChatOpenAI(model="gpt-4o-mini",
-                   api_key=gemini_token,
-                   base_url="https://data.talabat.com/api/public/genai"
-                   )
+        prompt = ChatPromptTemplate.from_template("""
+        Provide a detailed code review for this Flutter code.
+        Focus on:
+            1. Code quality and best practices specific to Flutter and Dart
+            2. Potential performance bottlenecks or widget rendering issues
+            3. Security considerations in mobile app development
+            4. Recommended architectural or implementation improvements
+        Please include specific, actionable feedback with code suggestions where applicable.
+
+        Code:
+        ```
+        {code_content}
+        ```
+
+        Focus on:
+        1. Code quality and best practices
+        2. Potential bugs or performance issues
+        3. Security considerations
+        4. Recommended improvements
+
+        Provide concise, actionable feedback.
+        """)
+
+        model = ChatOpenAI(
+            model="gpt-4o-mini",
+            api_key=gemini_token,
+            base_url="https://data.talabat.com/api/public/genai"
+        )
 
         output_parser = StrOutputParser()
 
+        # Create the chain properly
         chain = prompt | model | output_parser
 
-        r = chain.invoke({"topic": "code review"})
-        return r
+        # Invoke with the correct input format
+        try:
+            result = chain.invoke({"code_content": code})
+            return result
+        except Exception as e:
+            print(f"Error analyzing code: {e}")
+            return f"Unable to generate review due to error: {e}"
 
     def create_pr_comment(self, reviews: List[Dict[str, Any]]):
         """
