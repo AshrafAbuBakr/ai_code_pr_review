@@ -24,7 +24,7 @@ class CodeReviewer:
         self.gh_client = Github(self.github_token)
         self.repo = self.gh_client.get_repo(self.repo_name)
         self.pr = self.repo.get_pull(self.pr_number)
-        self.gemini_token = os.getenv('GEMINI_TOKEN')
+        self.gemini_token = os.getenv('OPENAI_API_KEY')
         # Model path
         # self.model_path = str(Path.home() / '.cache/models/codellama-7b.Q4_K_M.gguf')
         # Validate model exists
@@ -68,25 +68,25 @@ class CodeReviewer:
         # model = self._load_model()
         #Provide a detailed code review for the following {Path(file_path).suffix} file:
         #File: {file_path}
-        prompt = f"""
-        Provide a detailed code review for this Flutter code.
-        Focus on:
-            1. Code quality and best practices specific to Flutter and Dart
-            2. Potential performance bottlenecks or widget rendering issues
-            3. Security considerations in mobile app development
-            4. Recommended architectural or implementation improvements
-        Please include specific, actionable feedback with code suggestions where applicable.
-        Code:
-        ```
-        {code}
-        ```
-        Focus on:
-        1. Code quality and best practices
-        2. Potential bugs or performance issues
-        3. Security considerations
-        4. Recommended improvements
-        Provide concise, actionable feedback.
-        """
+        prompt = ChatPromptTemplate.from_template(f"""
+           Provide a detailed code review for this Flutter code.
+           Focus on:
+               1. Code quality and best practices specific to Flutter and Dart
+               2. Potential performance bottlenecks or widget rendering issues
+               3. Security considerations in mobile app development
+               4. Recommended architectural or implementation improvements
+           Please include specific, actionable feedback with code suggestions where applicable.
+           Code:
+           ```
+           {code}
+           ```
+           Focus on:
+           1. Code quality and best practices
+           2. Potential bugs or performance issues
+           3. Security considerations
+           4. Recommended improvements
+           Provide concise, actionable feedback.
+           """)
         print(prompt)
         # try:
         #     response = model.create_completion(
