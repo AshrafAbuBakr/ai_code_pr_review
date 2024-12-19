@@ -10,75 +10,79 @@ on:
       - 'lib/**'
       - 'test/**'
 
-jobs:
-  review:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - uses: actions/checkout@v3
-      - name: "Get diff of the pull request"
-        id: get_diff
-        shell: bash
-        env:
-          PULL_REQUEST_HEAD_REF: "${{ github.event.pull_request.head.ref }}"
-          PULL_REQUEST_BASE_REF: "${{ github.event.pull_request.base.ref }}"
-        run: |-
-          git fetch origin "${{ env.PULL_REQUEST_HEAD_REF }}"
-          git fetch origin "${{ env.PULL_REQUEST_BASE_REF }}"
-          git checkout "${{ env.PULL_REQUEST_HEAD_REF }}"
-          git diff "origin/${{ env.PULL_REQUEST_BASE_REF }}" > "diff.txt"
-          {
-            echo "pull_request_diff<<EOF";
-            cat "diff.txt";
-            echo 'EOF';
-          } >> $GITHUB_OUTPUT
-      - uses: rubensflinco/gemini-code-review-action@1.0.5
-        name: "Code Review by Gemini AI"
-        id: review
-        with:
-          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
-          github_token: ${{ secrets.GEMINI_GIT_TOKEN }}
-          github_repository: ${{ github.repository }}
-          github_pull_request_number: ${{ github.event.pull_request.number }}
-          git_commit_hash: ${{ github.event.pull_request.head.sha }}
-          model: "gemini-1.5-pro-latest"
-          pull_request_diff: |-
-            ${{ steps.get_diff.outputs.pull_request_diff }}
-          pull_request_chunk_size: "3500"
-          extra_prompt: |-
-            Review the code in english!
-          log_level: "DEBUG"
 #jobs:
 #  review:
 #    runs-on: ubuntu-latest
 #    permissions:
 #      contents: read
 #      pull-requests: write
-#
-#    # Add concurrency to cancel outdated runs
-#    concurrency:
-#      group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
-#      cancel-in-progress: true
-#
 #    steps:
-      # Previous steps remain the same...
-
-#      - name: Run code review with timeout
-#        timeout-minutes: 10  # Add timeout
+#      - uses: actions/checkout@v3
+#      - name: "Get diff of the pull request"
+#        id: get_diff
+#        shell: bash
 #        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#          PR_NUMBER: ${{ github.event.pull_request.number }}
-#          REPO_NAME: ${{ github.repository }}
-#          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
-#          MAX_FILES_TO_REVIEW: 10  # Limit number of files
-#          MAX_FILE_SIZE: 1000  # Limit lines per file
-#        run: python .github/scripts/review.py
-#
-#      - name: Report timing metrics
-#        if: always()
-#        run: |
-#          echo "Workflow completion time: ${{ steps.review.time }}"
-#          echo "Files reviewed: ${{ steps.review.outputs.files_reviewed }}"
+#          PULL_REQUEST_HEAD_REF: "${{ github.event.pull_request.head.ref }}"
+#          PULL_REQUEST_BASE_REF: "${{ github.event.pull_request.base.ref }}"
+#        run: |-
+#          git fetch origin "${{ env.PULL_REQUEST_HEAD_REF }}"
+#          git fetch origin "${{ env.PULL_REQUEST_BASE_REF }}"
+#          git checkout "${{ env.PULL_REQUEST_HEAD_REF }}"
+#          git diff "origin/${{ env.PULL_REQUEST_BASE_REF }}" > "diff.txt"
+#          {
+#            echo "pull_request_diff<<EOF";
+#            cat "diff.txt";
+#            echo 'EOF';
+#          } >> $GITHUB_OUTPUT
+#      - uses: rubensflinco/gemini-code-review-action@1.0.5
+#        name: "Code Review by Gemini AI"
+#        id: review
+#        with:
+#          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+#          github_token: ${{ secrets.GEMINI_GIT_TOKEN }}
+#          github_repository: ${{ github.repository }}
+#          github_pull_request_number: ${{ github.event.pull_request.number }}
+#          git_commit_hash: ${{ github.event.pull_request.head.sha }}
+#          model: "gemini-1.5-pro-latest"
+#          pull_request_diff: |-
+#            ${{ steps.get_diff.outputs.pull_request_diff }}
+#          pull_request_chunk_size: "3500"
+#          extra_prompt: |-
+#            Review the code in english!
+#          log_level: "DEBUG"
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    # Add concurrency to cancel outdated runs
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+
+    steps:
+#       Previous steps remain the same...
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: pip3 install --user -r requirements.txt
+      - name: Run code review with timeout
+        timeout-minutes: 10  # Add timeout
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_TOKEN: ${{ secrets.GEMINI_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO_NAME: ${{ github.repository }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+          MAX_FILES_TO_REVIEW: 10  # Limit number of files
+          MAX_FILE_SIZE: 1000  # Limit lines per file
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python .github/scripts/review.py
+
+      - name: Report timing metrics
+        if: always()
+        run: |
+          echo "Workflow completion time: ${{ steps.review.time }}"
+          echo "Files reviewed: ${{ steps.review.outputs.files_reviewed }}"
 
