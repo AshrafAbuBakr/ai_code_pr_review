@@ -67,7 +67,9 @@ class CodeReviewer:
             str: AI-generated code review
         """
         prompt = ChatPromptTemplate.from_template("""
-        Provide a detailed code review for this Flutter code and a short description for the PR and a versioned changelog.
+        Provide a detailed code review for this Flutter code.
+        Provide a short description of the changes in this PR.
+        Provide a versioned change log with today's date.
         Focus on:
             1. Code quality and best practices specific to Flutter and Dart
             2. Potential performance bottlenecks or widget rendering issues
@@ -111,7 +113,7 @@ class CodeReviewer:
             comment_body += f"### :page_facing_up: File: `{review['file_path']}`\n\n"
             comment_body += f"{review['review']}\n\n"
         comment_body += "\n---\n"
-        comment_body += "_Automated review by CodeLlama. Verify suggestions carefully._"
+        comment_body += "_Automated review by ChatGPT. Verify suggestions carefully._"
         # Post or update comment
         existing_comments = list(self.pr.get_issue_comments())
         for comment in existing_comments:
