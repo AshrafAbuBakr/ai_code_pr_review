@@ -67,7 +67,7 @@ class CodeReviewer:
             str: AI-generated code review
         """
         prompt = ChatPromptTemplate.from_template("""
-        Provide a detailed code review for this Flutter code and a short description for the PR and a changelog.
+        Provide a detailed code review for this Flutter code and a short description for the PR and a versioned changelog.
         Focus on:
             1. Code quality and best practices specific to Flutter and Dart
             2. Potential performance bottlenecks or widget rendering issues
@@ -79,14 +79,6 @@ class CodeReviewer:
         ```
         {code_content}
         ```
-
-        Focus on:
-        1. Code quality and best practices
-        2. Potential bugs or performance issues
-        3. Security considerations
-        4. Recommended improvements
-
-        Provide concise, actionable feedback.
         """)
 
         model = ChatOpenAI(
